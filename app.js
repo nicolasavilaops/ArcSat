@@ -189,74 +189,106 @@ function geocodeAddress(geocoder, address) {
 
 // Load mock data for demonstration
 function loadMockData() {
-    const mockLocations = [
-        {
-            nome: 'John Deere Campinas',
-            tipo: 'fornecedor',
-            endereco: 'Campinas, SP',
-            position: { lat: -22.9099, lng: -47.0626 },
-            setor: 'Automotiva Agrícola',
-            categoria: 'Fornecedor Premium'
-        },
-        {
-            nome: 'Fazenda Santa Maria',
-            tipo: 'comprador',
-            endereco: 'Ribeirão Preto, SP',
-            position: { lat: -21.1699, lng: -47.8099 },
-            setor: 'Produtor Rural',
-            categoria: 'Cliente Gold'
-        },
-        {
-            nome: 'Bunge Alimentos',
-            tipo: 'fornecedor',
-            endereco: 'Santos, SP',
-            position: { lat: -23.9618, lng: -46.3322 },
-            setor: 'Insumos Agrícolas',
-            categoria: 'Fornecedor Nacional'
-        },
-        {
-            nome: 'Cooperativa Vale Verde',
-            tipo: 'comprador',
-            endereco: 'Uberaba, MG',
-            position: { lat: -19.7479, lng: -47.9381 },
-            setor: 'Cooperativa',
-            categoria: 'Cliente Corporativo'
-        },
-        {
-            nome: 'Case IH Brasil',
-            tipo: 'fornecedor',
-            endereco: 'Sorocaba, SP',
-            position: { lat: -23.5015, lng: -47.4526 },
-            setor: 'Automotiva Agrícola',
-            categoria: 'Fornecedor Internacional'
-        },
-        {
-            nome: 'Fazenda Boa Vista',
-            tipo: 'comprador',
-            endereco: 'Goiânia, GO',
-            position: { lat: -16.6869, lng: -49.2648 },
-            setor: 'Produtor Rural',
-            categoria: 'Cliente Enterprise'
-        },
-        {
-            nome: 'New Holland',
-            tipo: 'fornecedor',
-            endereco: 'Curitiba, PR',
-            position: { lat: -25.4284, lng: -49.2733 },
-            setor: 'Automotiva Agrícola',
-            categoria: 'Fornecedor Premium'
-        },
-        {
-            nome: 'Agropecuária Moderna',
-            tipo: 'comprador',
-            endereco: 'Campo Grande, MS',
-            position: { lat: -20.4697, lng: -54.6201 },
-            setor: 'Pecuária',
-            categoria: 'Cliente Gold'
-        }
-    ];
+    console.log('Carregando dados de demonstração...');
+    
+    // Generate 100 mock locations across Brazil
+    const mockLocations = generateMockLocations(100);
     
     mockLocations.forEach(location => addMarker(location));
+    
+    console.log(`✅ ${mockLocations.length} localizações de demonstração carregadas`);
+}
+
+// Generate realistic mock locations
+function generateMockLocations(count) {
+    const cidades = [
+        { nome: 'Campinas', uf: 'SP', lat: -22.9099, lng: -47.0626 },
+        { nome: 'Ribeirão Preto', uf: 'SP', lat: -21.1699, lng: -47.8099 },
+        { nome: 'Santos', uf: 'SP', lat: -23.9618, lng: -46.3322 },
+        { nome: 'Uberaba', uf: 'MG', lat: -19.7479, lng: -47.9381 },
+        { nome: 'Uberlândia', uf: 'MG', lat: -18.9188, lng: -48.2766 },
+        { nome: 'Sorocaba', uf: 'SP', lat: -23.5015, lng: -47.4526 },
+        { nome: 'Goiânia', uf: 'GO', lat: -16.6869, lng: -49.2648 },
+        { nome: 'Campo Grande', uf: 'MS', lat: -20.4697, lng: -54.6201 },
+        { nome: 'Curitiba', uf: 'PR', lat: -25.4284, lng: -49.2733 },
+        { nome: 'Londrina', uf: 'PR', lat: -23.3045, lng: -51.1696 },
+        { nome: 'Cascavel', uf: 'PR', lat: -24.9555, lng: -53.4552 },
+        { nome: 'Brasília', uf: 'DF', lat: -15.7939, lng: -47.8828 },
+        { nome: 'Dourados', uf: 'MS', lat: -22.2211, lng: -54.8056 },
+        { nome: 'Rio Verde', uf: 'GO', lat: -17.7939, lng: -50.9261 },
+        { nome: 'Sorriso', uf: 'MT', lat: -12.5417, lng: -55.7139 },
+        { nome: 'Sinop', uf: 'MT', lat: -11.8644, lng: -55.5050 },
+        { nome: 'Lucas do Rio Verde', uf: 'MT', lat: -13.0536, lng: -55.9050 },
+        { nome: 'Rondonópolis', uf: 'MT', lat: -16.4706, lng: -54.6356 }
+    ];
+
+    const fornecedores = [
+        'John Deere', 'Case IH', 'New Holland', 'Massey Ferguson',
+        'Valtra', 'Jacto', 'Stara', 'Kuhn', 'Marchesan',
+        'Bunge', 'Cargill', 'ADM', 'Yara', 'Mosaic', 'Corteva'
+    ];
+
+    const fazendas = [
+        'Fazenda Santa Maria', 'Fazenda Boa Vista', 'Agropecuária Moderna',
+        'Fazenda Esperança', 'Fazenda São José', 'Fazenda Primavera',
+        'Fazenda Bela Vista', 'Fazenda Progresso', 'Fazenda União'
+    ];
+
+    const cooperativas = [
+        'Cooperativa Vale Verde', 'Cooperativa Agrícola Regional',
+        'Cooperativa Central', 'Cooperativa do Cerrado'
+    ];
+
+    const locations = [];
+
+    for (let i = 0; i < count; i++) {
+        const cidade = cidades[Math.floor(Math.random() * cidades.length)];
+        const tipo = Math.random() > 0.65 ? 'fornecedor' : 'comprador';
+        
+        let nome, setor, categoria;
+        
+        if (tipo === 'fornecedor') {
+            nome = fornecedores[Math.floor(Math.random() * fornecedores.length)] + 
+                   ' ' + cidade.nome;
+            setor = Math.random() > 0.5 ? 'Automotiva Agrícola' : 'Insumos Agrícolas';
+            categoria = ['Fornecedor Premium', 'Fornecedor Nacional', 'Fornecedor Internacional'][
+                Math.floor(Math.random() * 3)
+            ];
+        } else {
+            const rand = Math.random();
+            if (rand > 0.7) {
+                nome = cooperativas[Math.floor(Math.random() * cooperativas.length)] + 
+                       ' de ' + cidade.nome;
+                setor = 'Cooperativa';
+                categoria = 'Cliente Corporativo';
+            } else {
+                nome = fazendas[Math.floor(Math.random() * fazendas.length)] + 
+                       ' ' + (i + 1);
+                setor = Math.random() > 0.6 ? 'Produtor Rural' : 'Pecuária';
+                categoria = ['Cliente Gold', 'Cliente Enterprise', 'Cliente Premium'][
+                    Math.floor(Math.random() * 3)
+                ];
+            }
+        }
+
+        // Add randomness to coordinates
+        const latOffset = (Math.random() - 0.5) * 0.5;
+        const lngOffset = (Math.random() - 0.5) * 0.5;
+
+        locations.push({
+            nome: nome,
+            tipo: tipo,
+            endereco: `${cidade.nome}, ${cidade.uf}`,
+            position: {
+                lat: cidade.lat + latOffset,
+                lng: cidade.lng + lngOffset
+            },
+            setor: setor,
+            categoria: categoria
+        });
+    }
+
+    return locations;
 }
 
 // Add marker to map
