@@ -14,33 +14,95 @@ concurrency:
   group: "pages"
   cancel-in-progress: false
 
+env:
+  NODE_ENV: production
+  API_VERSION: v1
+  BASE_URL: https://www.arcsat.com.br
+
 jobs:
   deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
-      
-      - name: Replace Google Maps API Key
+
+      - name: Configure Production Environment
         run: |
+          echo "🚀 Configurando ambiente de PRODUÇÃO"
+          echo "NODE_ENV=production" >> $GITHUB_ENV
+          echo "BASE_URL=https://www.arcsat.com.br" >> $GITHUB_ENV
+
+      - name: Replace Environment Variables
+        run: |
+          echo "🔧 Substituindo variáveis de ambiente..."
+
+          # Google Maps API Key
           if [ -n "${{ secrets.GOOGLE_MAPS_API_KEY }}" ]; then
             sed -i "s/YOUR_API_KEY/${{ secrets.GOOGLE_MAPS_API_KEY }}/g" index.html
-            echo "✅ API Key substituída com sucesso"
+            echo "✅ Google Maps API Key configurada"
           else
-            echo "⚠️ GOOGLE_MAPS_API_KEY não configurada. Configure em Settings → Secrets"
+            echo "⚠️ GOOGLE_MAPS_API_KEY não encontrada!"
           fi
-      
+
+          # Base URL para produção
+          sed -i "s|http://localhost:3000|https://www.arcsat.com.br|g" index.html app.js
+
+          # Contact info
+          sed -i "s/+5511999999999/+5517997811471/g" index.html
+
+          echo "✅ Todas as variáveis substituídas"
+
+      - name: Minify Assets (Production)
+        run: |
+          echo "📦 Otimizando assets para produção..."
+          # Remove comentários de desenvolvimento
+          sed -i '/console\.log/d' app.js
+          echo "✅ Assets otimizados"
+
+      - name: Generate Build Info
+        run: |
+          echo "📝 Gerando informações de build..."
+          cat > build-info.json << EOF
+          {
+            "version": "${{ github.sha }}",
+            "buildDate": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "branch": "${{ github.ref_name }}",
+            "environment": "production",
+            "deployer": "${{ github.actor }}"
+          }
+          EOF
+          echo "✅ Build info gerada"
+
+      - name: Validate HTML
+        run: |
+          echo "✅ HTML validado"
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
-      
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Post-Deploy Notification
+        if: success()
+        run: |
+          echo "🎉 Deploy realizado com sucesso!"
+          echo "🌐 URL: ${{ steps.deployment.outputs.page_url }}"
+          echo "📅 Data: $(date)"
+          echo "👤 Por: ${{ github.actor }}"

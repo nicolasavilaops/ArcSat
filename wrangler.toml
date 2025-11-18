@@ -1,0 +1,74 @@
+name = "arcsat"
+main = "src/index.js"
+compatibility_date = "2025-01-16"
+workers_dev = false
+
+# Produção - www.arcsat.com.br
+[env.production]
+name = "arcsat-production"
+routes = [
+  { pattern = "www.arcsat.com.br/*", zone_name = "arcsat.com.br" },
+  { pattern = "arcsat.com.br/*", zone_name = "arcsat.com.br" },
+  { pattern = "api.arcsat.com.br/*", zone_name = "arcsat.com.br" }
+]
+
+# Variáveis de ambiente
+[env.production.vars]
+NODE_ENV = "production"
+API_VERSION = "v1"
+BASE_URL = "https://www.arcsat.com.br"
+API_URL = "https://api.arcsat.com.br"
+PORT = "8787"
+SUPPORT_PHONE = "+5517997811471"
+CONTACT_EMAIL = "contato@arcsat.com.br"
+CORS_ORIGIN = "https://www.arcsat.com.br"
+FEATURE_GEOPROCESSING = "true"
+FEATURE_CNPJ_ENRICHMENT = "true"
+
+# KV Namespaces (Cache)
+[[kv_namespaces]]
+binding = "CACHE"
+id = "seu_kv_namespace_id"
+preview_id = "seu_kv_preview_id"
+
+# D1 Database (SQLite)
+[[d1_databases]]
+binding = "DB"
+database_name = "arcsat-db"
+database_id = "seu_d1_database_id"
+
+# R2 Storage (Arquivos)
+[[r2_buckets]]
+binding = "STORAGE"
+bucket_name = "arcsat-storage"
+preview_bucket_name = "arcsat-storage-preview"
+
+# Durable Objects (WebSockets/Real-time)
+[[durable_objects.bindings]]
+name = "RATE_LIMITER"
+class_name = "RateLimiter"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["RateLimiter"]
+
+# Analytics Engine
+[[analytics_engine_datasets]]
+binding = "ANALYTICS"
+
+# Secrets (configurar via wrangler secret put)
+# MONGODB_URI
+# GOOGLE_MAPS_API_KEY
+# SESSION_SECRET
+# JWT_SECRET
+# AVILA_API_KEY
+
+# Triggers e Cron Jobs
+[triggers]
+crons = [
+  "0 3 * * *"  # Backup diário às 3h
+]
+
+# Limites
+[limits]
+cpu_ms = 50

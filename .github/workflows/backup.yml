@@ -1,0 +1,62 @@
+name: MongoDB Backup
+
+on:
+  schedule:
+    # Backup diário às 3h da manhã (UTC)
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  backup:
+    name: Backup MongoDB to GitHub
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup MongoDB Tools
+        run: |
+          wget -qO - https://www.mongodb.org/static/pgp/server-7.0.asc | sudo apt-key add -
+          echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
+          sudo apt-get update
+          sudo apt-get install -y mongodb-database-tools
+
+      - name: Create Backup Directory
+        run: mkdir -p backups
+
+      - name: Backup MongoDB
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+        run: |
+          DATE=$(date +%Y%m%d_%H%M%S)
+          mongodump --uri="$MONGODB_URI" --out=backups/backup_$DATE
+
+          # Comprimir backup
+          cd backups
+          tar -czf backup_$DATE.tar.gz backup_$DATE
+          rm -rf backup_$DATE
+
+          echo "✅ Backup criado: backup_$DATE.tar.gz"
+
+      - name: Keep only last 7 backups
+        run: |
+          cd backups
+          ls -t *.tar.gz | tail -n +8 | xargs -r rm
+          echo "✅ Backups antigos removidos"
+
+      - name: Commit and Push Backup
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add backups/*.tar.gz
+          git commit -m "chore: backup automático $(date +%Y-%m-%d)" || echo "Nada para commitar"
+          git push
+
+      - name: Notify Success
+        if: success()
+        run: echo "✅ Backup concluído com sucesso"
+
+      - name: Notify Failure
+        if: failure()
+        run: echo "❌ Backup falhou!"

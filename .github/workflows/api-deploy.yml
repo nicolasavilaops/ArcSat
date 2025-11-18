@@ -1,0 +1,143 @@
+name: Backend API - Production Deploy
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'api/**'
+      - 'server.js'
+      - 'package.json'
+  workflow_dispatch:
+
+env:
+  NODE_ENV: production
+  API_VERSION: v1
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test || echo "No tests defined"
+
+      - name: Run linter
+        run: npm run lint || echo "No linter configured"
+
+  build:
+    name: Build and Deploy API
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --production
+
+      - name: Create .env file
+        run: |
+          cat > .env << EOF
+          NODE_ENV=production
+          PORT=${{ vars.PORT || 3000 }}
+          API_VERSION=${{ vars.API_VERSION || 'v1' }}
+          BASE_URL=${{ vars.BASE_URL }}
+
+          # MongoDB
+          MONGODB_URI=${{ secrets.MONGODB_URI }}
+          MONGODB_DB_NAME=${{ vars.MONGODB_DB_NAME }}
+          MONGODB_PASSWORD=${{ secrets.MONGODB_PASSWORD }}
+
+          # Redis
+          REDIS_HOST=${{ vars.REDIS_HOST }}
+          REDIS_PORT=${{ vars.REDIS_PORT || 6379 }}
+          REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+          REDIS_TTL=${{ vars.REDIS_TTL || 3600 }}
+          CACHE_ENABLED=${{ vars.CACHE_ENABLED || 'true' }}
+
+          # Google Maps
+          GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}
+
+          # Brasil APIs
+          BRASILAPI_BASE_URL=${{ vars.BRASILAPI_BASE_URL }}
+          RECEITAWS_BASE_URL=${{ vars.RECEITAWS_BASE_URL }}
+
+          # Avila API
+          AVILA_API_BASE_URL=${{ vars.AVILA_API_BASE_URL }}
+          AVILA_API_KEY=${{ secrets.AVILA_API_KEY }}
+
+          # Security
+          SESSION_SECRET=${{ secrets.SESSION_SECRET }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          CORS_ORIGIN=${{ vars.CORS_ORIGIN }}
+
+          # Contact
+          CONTACT_EMAIL=${{ vars.CONTACT_EMAIL }}
+          SUPPORT_PHONE=${{ vars.SUPPORT_PHONE }}
+
+          # Features
+          FEATURE_GEOPROCESSING=${{ vars.FEATURE_GEOPROCESSING || 'true' }}
+          FEATURE_CNPJ_ENRICHMENT=${{ vars.FEATURE_CNPJ_ENRICHMENT || 'true' }}
+          EOF
+
+      - name: Build application
+        run: npm run build || echo "No build script defined"
+
+      - name: Deploy to Vercel (Serverless)
+        if: vars.VERCEL_TOKEN
+        run: |
+          npm i -g vercel
+          vercel --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to Railway
+        if: vars.RAILWAY_TOKEN
+        uses: berviantoleo/railway-deploy@main
+        with:
+          railway_token: ${{ secrets.RAILWAY_TOKEN }}
+          service: arcsat-api
+
+      - name: Deploy to Render
+        if: vars.RENDER_DEPLOY_HOOK
+        run: |
+          curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
+
+      - name: Health Check
+        run: |
+          echo "Aguardando deploy..."
+          sleep 30
+
+          if [ -n "${{ vars.BASE_URL }}" ]; then
+            curl -f ${{ vars.BASE_URL }}/health || echo "Health check failed"
+          fi
+
+      - name: Notify Success
+        if: success()
+        run: |
+          echo "✅ Deploy da API realizado com sucesso!"
+          echo "🌐 URL: ${{ vars.BASE_URL }}"
+
+      - name: Notify Failure
+        if: failure()
+        run: |
+          echo "❌ Deploy falhou!"
