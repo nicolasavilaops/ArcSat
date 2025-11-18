@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ArcSat - Plataforma de Geoprocessamento e Inteligência de Mercado para o Agronegócio">
+    <meta name="keywords" content="geoprocessamento, agronegócio, automotiva agrícola, geolocalização, análise espacial">
+    <title>ArcSat - Inteligência Geoespacial para o Agronegócio</title>
+    
+    <!-- Google Maps API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=visualization,drawing,geometry"></script>
+    
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-green: #2d5016;
+            --secondary-green: #4a7c2e;
+            --accent-green: #6b9d3e;
+            --light-green: #a8d08d;
+            --earth-brown: #6b4423;
+            --sky-blue: #87ceeb;
+            --gold: #daa520;
+            --white: #ffffff;
+            --gray-light: #f5f5f5;
+            --gray-dark: #333333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--gray-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--secondary-green) 100%);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><path d="M0,300 Q300,100 600,300 T1200,300 L1200,600 L0,600 Z" fill="rgba(255,255,255,0.05)"/></svg>') no-repeat center;
+            background-size: cover;
+            opacity: 0.3;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            max-width: 1200px;
+            padding: 0 20px;
+        }
+
+        .hero h1 {
+            font-size: 4em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero p {
+            font-size: 1.5em;
+            margin-bottom: 40px;
+            opacity: 0.95;
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeInUp 1s ease-out 0.6s both;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: var(--gold);
+            color: var(--gray-dark);
+        }
+
+        .btn-primary:hover {
+            background: #ffb700;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(218, 165, 32, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--white);
+            border: 2px solid var(--white);
+        }
+
+        .btn-secondary:hover {
+            background: var(--white);
+            color: var(--primary-green);
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(45, 80, 22, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px 0;
+            z-index: 1000;
+            transition: all 0.3s;
+        }
+
+        nav.scrolled {
+            background: var(--primary-green);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .logo {
+            font-size: 2em;
+            font-weight: 700;
+            color: var(--white);
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: var(--gold);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--white);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--gold);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 100px 20px;
+            background: var(--gray-light);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5em;
+            color: var(--primary-green);
+            margin-bottom: 60px;
+        }
+
+        .features-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+        }
+
+        .feature-card {
+            background: var(--white);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            transition: all 0.3s;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(45, 80, 22, 0.15);
+        }
+
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        .feature-card h3 {
+            color: var(--primary-green);
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        .feature-card p {
+            color: var(--gray-dark);
+            line-height: 1.8;
+        }
+
+        /* Map Section */
+        .map-section {
+            padding: 100px 20px;
+            background: var(--white);
+        }
+
+        .map-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        #map {
+            width: 100%;
+            height: 600px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            margin-top: 40px;
+        }
+
+        .map-controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .map-controls button {
+            padding: 12px 25px;
+            background: var(--primary-green);
+            color: var(--white);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .map-controls button:hover {
+            background: var(--secondary-green);
+            transform: scale(1.05);
+        }
+
+        /* Stats Section */
+        .stats {
+            padding: 100px 20px;
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--secondary-green) 100%);
+            color: var(--white);
+        }
+
+        .stats-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            text-align: center;
+        }
+
+        .stat-card {
+            padding: 30px;
+        }
+
+        .stat-number {
+            font-size: 3.5em;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        /* Partners Section */
+        .partners {
+            padding: 100px 20px;
+            background: var(--gray-light);
+        }
+
+        .partners-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+        }
+
+        .partner-card {
+            background: var(--white);
+            padding: 30px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 120px;
+            font-weight: 600;
+            color: var(--primary-green);
+            font-size: 1.2em;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .partner-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(45, 80, 22, 0.15);
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 100px 20px;
+            background: linear-gradient(135deg, var(--earth-brown) 0%, var(--primary-green) 100%);
+            color: var(--white);
+            text-align: center;
+        }
+
+        .cta-section h2 {
+            font-size: 2.5em;
+            margin-bottom: 30px;
+        }
+
+        .cta-section p {
+            font-size: 1.3em;
+            margin-bottom: 40px;
+            opacity: 0.95;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--primary-green);
+            color: var(--white);
+            padding: 60px 20px 20px;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-section h3 {
+            color: var(--gold);
+            margin-bottom: 20px;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-section a {
+            color: var(--white);
+            text-decoration: none;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .footer-section a:hover {
+            opacity: 1;
+            color: var(--gold);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            opacity: 0.8;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5em;
+            }
+
+            .hero p {
+                font-size: 1.2em;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .section-title {
+                font-size: 2em;
+            }
+
+            #map {
+                height: 400px;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: var(--gold);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav id="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">Arc<span>Sat</span></a>
+            <ul class="nav-links">
+                <li><a href="#features">Soluções</a></li>
+                <li><a href="#map">Mapa</a></li>
+                <li><a href="#partners">Parceiros</a></li>
+                <li><a href="#contact">Contato</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Inteligência Geoespacial para o Agronegócio</h1>
+            <p>Conectando fornecedores, compradores e distribuidores através de geoprocessamento avançado</p>
+            <div class="cta-buttons">
+                <a href="#map" class="btn btn-primary">Explorar Mapa</a>
+                <a href="#contact" class="btn btn-secondary">Fale Conosco</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <h2 class="section-title">Nossas Soluções</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🗺️</div>
+                <h3>Mapeamento Inteligente</h3>
+                <p>Visualização geoespacial de toda sua rede de fornecedores e compradores com análise de centróides e otimização de rotas.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🚜</div>
+                <h3>Automotiva Agrícola</h3>
+                <p>Controle completo de máquinas, equipamentos e peças com rastreamento geolocalizado em tempo real.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🌾</div>
+                <h3>Gestão de Propriedades</h3>
+                <p>Análise detalhada de propriedades rurais, culturas, safras e produtividade com mapas temáticos personalizados.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Análise de Mercado</h3>
+                <p>Inteligência de negócios com dados geoespaciais para identificar oportunidades e otimizar operações.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔗</div>
+                <h3>Rede de Relacionamentos</h3>
+                <p>Conecte-se com fornecedores e compradores baseado em proximidade geográfica e compatibilidade comercial.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <h3>Plataforma Integrada</h3>
+                <p>Acesse de qualquer dispositivo com sincronização em tempo real e dashboards personalizados.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Map Section -->
+    <section id="map" class="map-section">
+        <div class="map-container">
+            <h2 class="section-title">Mapa Interativo de Clientes e Fornecedores</h2>
+            <p style="text-align: center; max-width: 800px; margin: 0 auto; color: var(--gray-dark);">
+                Explore a distribuição geográfica da sua rede de negócios. Cada marcador representa um cliente ou fornecedor com informações detalhadas.
+            </p>
+            
+            <div id="map"></div>
+            
+            <div class="map-controls">
+                <button onclick="showAllMarkers()">📍 Todos</button>
+                <button onclick="showFornecedores()">🏭 Fornecedores</button>
+                <button onclick="showCompradores()">🛒 Compradores</button>
+                <button onclick="showHeatmap()">🔥 Mapa de Calor</button>
+                <button onclick="calculateCentroids()">🎯 Centróides</button>
+                <button onclick="optimizeRoutes()">🛣️ Otimizar Rotas</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <h2 class="section-title" style="color: var(--white);">ArcSat em Números</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="stat-clientes">0</div>
+                <div class="stat-label">Clientes Ativos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-fornecedores">0</div>
+                <div class="stat-label">Fornecedores</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-propriedades">0</div>
+                <div class="stat-label">Propriedades Mapeadas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-area">0</div>
+                <div class="stat-label">Hectares Monitorados</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Partners Section -->
+    <section id="partners" class="partners">
+        <h2 class="section-title">Principais Parceiros do Agronegócio</h2>
+        <div class="partners-grid">
+            <div class="partner-card">🚜 John Deere</div>
+            <div class="partner-card">🌾 Bunge</div>
+            <div class="partner-card">🚜 Case IH</div>
+            <div class="partner-card">🌱 Cargill</div>
+            <div class="partner-card">🚜 New Holland</div>
+            <div class="partner-card">🌾 ADM</div>
+            <div class="partner-card">🚜 Massey Ferguson</div>
+            <div class="partner-card">🌱 Yara</div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section id="contact" class="cta-section">
+        <h2>Pronto para Transformar seu Negócio?</h2>
+        <p>Entre em contato e descubra como o ArcSat pode otimizar suas operações</p>
+        <div class="cta-buttons">
+            <a href="mailto:contato@arcsat.com.br" class="btn btn-primary">Solicitar Demo</a>
+            <a href="tel:+5511999999999" class="btn btn-secondary">Falar com Especialista</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>ArcSat</h3>
+                <p>Inteligência Geoespacial para o Agronegócio</p>
+                <p style="margin-top: 20px; opacity: 0.8;">
+                    Transformando dados em decisões estratégicas através de tecnologia de ponta em geoprocessamento.
+                </p>
+            </div>
+            <div class="footer-section">
+                <h3>Soluções</h3>
+                <ul>
+                    <li><a href="#features">Mapeamento Inteligente</a></li>
+                    <li><a href="#features">Automotiva Agrícola</a></li>
+                    <li><a href="#features">Gestão de Propriedades</a></li>
+                    <li><a href="#features">Análise de Mercado</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Empresa</h3>
+                <ul>
+                    <li><a href="#about">Sobre Nós</a></li>
+                    <li><a href="#partners">Parceiros</a></li>
+                    <li><a href="#contact">Contato</a></li>
+                    <li><a href="#careers">Carreiras</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Contato</h3>
+                <ul>
+                    <li>📧 contato@arcsat.com.br</li>
+                    <li>📱 (11) 99999-9999</li>
+                    <li>📍 São Paulo, SP</li>
+                    <li>🌐 www.arcsat.com.br</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 ArcSat - Todos os direitos reservados | Desenvolvido por Avila DevOps</p>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
