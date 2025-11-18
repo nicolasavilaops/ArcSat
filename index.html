@@ -5,14 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="ArcSat - Plataforma de Geoprocessamento e Inteligência de Mercado para o Agronegócio">
     <meta name="keywords" content="geoprocessamento, agronegócio, automotiva agrícola, geolocalização, análise espacial">
+    <meta name="author" content="Avila DevOps">
     <title>ArcSat - Inteligência Geoespacial para o Agronegócio</title>
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512x512.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="msapplication-TileColor" content="#2d5016">
+    <meta name="msapplication-config" content="/browserconfig.xml">
+    <meta name="theme-color" content="#2d5016">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.arcsat.com.br/">
+    <meta property="og:title" content="ArcSat - Inteligência Geoespacial para o Agronegócio">
+    <meta property="og:description" content="Conectando fornecedores, compradores e distribuidores através de geoprocessamento avançado. Otimize sua logística e descubra oportunidades no agronegócio.">
+    <meta property="og:image" content="https://www.arcsat.com.br/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:site_name" content="ArcSat">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://www.arcsat.com.br/">
+    <meta name="twitter:title" content="ArcSat - Inteligência Geoespacial para o Agronegócio">
+    <meta name="twitter:description" content="Conectando fornecedores, compradores e distribuidores através de geoprocessamento avançado.">
+    <meta name="twitter:image" content="https://www.arcsat.com.br/twitter-card.png">
+
+    <!-- WhatsApp -->
+    <meta property="og:image:alt" content="ArcSat - Plataforma de Geoprocessamento para Agronegócio">
     
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://www.arcsat.com.br/">
+
     <!-- Google Maps API -->
     <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=visualization,drawing,geometry"></script>
-    
+
     <!-- Chart.js para gráficos -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
     <style>
         * {
             margin: 0;
@@ -531,9 +568,9 @@
             <p style="text-align: center; max-width: 800px; margin: 0 auto; color: var(--gray-dark);">
                 Explore a distribuição geográfica da sua rede de negócios. Cada marcador representa um cliente ou fornecedor com informações detalhadas.
             </p>
-            
+
             <div id="map"></div>
-            
+
             <div class="map-controls">
                 <button onclick="showAllMarkers()">📍 Todos</button>
                 <button onclick="showFornecedores()">🏭 Fornecedores</button>
