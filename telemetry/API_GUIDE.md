@@ -210,31 +210,31 @@ use avila_telemetry::{
 fn analyze_time_series(data: Vec<f64>) -> Result<(), Box<dyn std::error::Error>> {
     // Create time series
     let ts = TimeSeries::new(data).with_name("sensor_data");
-    
+
     // Basic statistics
     let stats = ts.statistics();
     println!("Mean: {:.2}, Std: {:.2}", stats.mean, stats.std_dev);
-    
+
     // Detect anomalies
     let detector = AnomalyDetector::default();
     let anomalies = detector.detect_ensemble(&ts)?;
     println!("Found {} anomalies", anomalies.len());
-    
+
     // Create features
     let lags = FeatureExtractor::create_lag_features(&ts, &[1, 2, 3])?;
     let rolling = FeatureExtractor::rolling_statistics(&ts, 5)?;
-    
+
     // Decompose
     let decomposer = Decomposer::new(DecompositionType::Additive, 7)?;
     let decomposition = decomposer.decompose(&ts)?;
-    
+
     // Forecast
     let mut forecaster = ExponentialSmoothing::new(0.3)?;
     forecaster.fit(&ts)?;
     let forecast = forecaster.forecast_with_confidence(10, 0.95)?;
-    
+
     println!("10-step forecast: {:?}", forecast.predictions);
-    
+
     Ok(())
 }
 ```

@@ -76,13 +76,13 @@ telemetry/
 
 ## 📚 Documentação
 
-| Arquivo | Descrição |
-|---------|-----------|
-| `README.md` | Documentação principal com exemplos |
-| `API_GUIDE.md` | Guia completo da API com referências |
-| `STRUCTURE.md` | Arquitetura e organização do projeto |
-| `CONTRIBUTING.md` | Como contribuir para o projeto |
-| `CHANGELOG.md` | Histórico de versões |
+| Arquivo           | Descrição                            |
+| ----------------- | ------------------------------------ |
+| `README.md`       | Documentação principal com exemplos  |
+| `API_GUIDE.md`    | Guia completo da API com referências |
+| `STRUCTURE.md`    | Arquitetura e organização do projeto |
+| `CONTRIBUTING.md` | Como contribuir para o projeto       |
+| `CHANGELOG.md`    | Histórico de versões                 |
 
 ## 🧪 Exemplos Práticos
 

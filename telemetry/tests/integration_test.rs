@@ -11,7 +11,7 @@ fn test_end_to_end_analysis() {
     let data: Vec<f64> = (0..100)
         .map(|x| x as f64 + (x as f64 / 5.0).sin() * 10.0)
         .collect();
-    
+
     let ts = TimeSeries::new(data);
 
     // Test statistics
@@ -70,9 +70,9 @@ fn test_decomposition_workflow() {
 
     let ts = TimeSeries::new(data);
     let decomposer = Decomposer::new(DecompositionType::Additive, 8).unwrap();
-    
+
     let result = decomposer.decompose(&ts).unwrap();
-    
+
     assert_eq!(result.trend.len(), ts.len());
     assert_eq!(result.seasonal.len(), ts.len());
     assert_eq!(result.residual.len(), ts.len());
@@ -88,7 +88,7 @@ fn test_anomaly_detection_accuracy() {
     let detector = AnomalyDetector::default();
 
     let anomalies = detector.detect_zscore(&ts).unwrap();
-    
+
     // Should detect the anomaly at index 25
     assert!(!anomalies.is_empty());
     assert!(anomalies.iter().any(|a| a.index == 25));
@@ -107,10 +107,10 @@ fn test_forecast_with_confidence_intervals() {
     assert_eq!(forecast.predictions.len(), 5);
     assert!(forecast.lower_bound.is_some());
     assert!(forecast.upper_bound.is_some());
-    
+
     let lower = forecast.lower_bound.unwrap();
     let upper = forecast.upper_bound.unwrap();
-    
+
     // Confidence intervals should be wider than point estimates
     for i in 0..5 {
         assert!(lower[i] < forecast.predictions[i]);

@@ -91,7 +91,7 @@ Raw Data → TimeSeries
     ┌─────┴─────┬──────────┬────────────┐
     ↓           ↓          ↓            ↓
 Anomaly    Features   Forecasting   Decomposition
-Detection                              
+Detection
     ↓           ↓          ↓            ↓
 Results    Feature     Predictions   Components
            Matrix
